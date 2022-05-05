@@ -1,0 +1,75 @@
+{% extends "template.html" %}
+
+{% block content %}
+<div class="jumbotron" style="background-image: linear-gradient(to right, #00a8ff, #4cd137);">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-center">
+                <h1 style="font-family: 'Permanent Marker', cursive; font-size: 50px; color: white;">
+                    Welcome to the Face MaskDetector Online
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="container-fluid">
+        <div id="frame_container" class="row">
+            <div class="col-12">
+                <img src="/static/images/stay-safe.jpg" class="img-thumbnail img-fluid mx-auto d-block">
+            </div>
+        </div>
+        <div class="row mt-3 mb-5">
+            <div class="col-6 d-flex justify-content-end">
+                <button id="start" onclick="start()" class="btn btn-success"><i class="fa fa-video-camera"
+                        aria-hidden="true"></i> Start
+                </button>
+            </div>
+            <div class="col-6 d-flex justify-content-start">
+                <button id="stop" onclick="stop()" class="btn btn-danger active"><i class="fa fa-stop"
+                        aria-hidden="true"></i> Stop
+                </button>
+            </div>
+        </div>
+        <hr>
+        <div class="row" style="color: white;">
+            <h4>What is this?</h4>
+        </div>
+        <div class="row" style="color: white;">
+            <p>This is a mask detector, an algorithm based on deep neural networks that detects people through your
+                camera and write a bounding box around faces,
+                looking if they were masks or not.</p>
+        </div>
+        <div class="row mb-5">
+            <h4 class="d-flex mx-auto lead" style="color: #c23616; font-size: 25px; font-weight: bold;">
+                <strong>Stay safe and wear mask.
+                    Maintain Social
+                    distancing</strong>.</p>
+                <h4></h4>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        $('#image-detector').attr('class', 'nav-item');
+        $('#live').attr('class', 'nav-item active');
+    })
+
+    function stop() {
+        $("img").attr("src", "/static/images/stay-safe.jpg");
+        $("#stop").attr("class", "btn btn-danger active");
+
+        $("#start").attr("class", "btn btn-success");
+    }
+    function start() {
+        $("img").attr("src", "{{url_for('main.video_feed')}}");
+        $("#start").attr("class", "btn btn-success active");
+
+        $("#stop").attr("class", "btn btn-danger");
+    }
+
+</script>
+
+{% endblock %}

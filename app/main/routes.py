@@ -1,10 +1,12 @@
 from base64 import b64encode
+# from crypt import methods
 from io import BytesIO
+from json.tool import main
 
 import cv2
 import numpy as np
 from PIL import Image
-from flask import render_template, Response, flash
+from flask import render_template, Response, flash, request, redirect, url_for, session
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
 from werkzeug.exceptions import abort
@@ -14,6 +16,23 @@ from app.main.camera import Camera
 
 from source.test_new_images import detect_mask_in_image
 from source.video_detector import detect_mask_in_frame
+
+import mysql.connector
+import re
+
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="mriganka123",
+    database="flask"
+)
+
+# mycursor = mydb.cursor()
+
+# mycursor.execute("SHOW DATABASES")
+
+# for x in mycursor:
+#     print(x)
 
 
 @main_bp.route("/")
@@ -68,8 +87,84 @@ def image_processing():
     with BytesIO() as img_io:
         image_detected.save(img_io, 'PNG')
         img_io.seek(0)
-        base64img = "data:image/png;base64," + b64encode(img_io.getvalue()).decode('ascii')
+        base64img = "data:image/png;base64," + \
+            b64encode(img_io.getvalue()).decode('ascii')
         return base64img
+
+
+@main_bp.route("/login", methods=['GET', "POST"])
+def login():
+    # Output message if something goes wrong...
+    msg = ''
+    # Check if "username" and "password" POST requests exist (user submitted form)
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+        # Create variables for easy access
+        username = request.form['username']
+        password = request.form['password']
+        # Check if account exists using MySQL
+        cursor = mydb.cursor()
+        cursor.execute(
+            'SELECT * FROM accounts WHERE username = %s AND password = %s', (username, password,))
+        # Fetch one record and return result
+        account = cursor.fetchone()
+        # print(account)
+        # If account exists in accounts table in out database
+        if account:
+            # Create session data, we can access this data in other routes
+            session['loggedin'] = True
+            session['id'] = account[1]
+            session['username'] = account[2]
+            # Redirect to home page
+            return 'Logged in successfully!'
+        else:
+            # Account doesnt exist or username/password incorrect
+            msg = 'Incorrect username/password!'
+    # Show the login form with message (if any)
+    return render_template("login.html", msg=msg)
+
+
+@main_bp.route("/register", methods=['GET', "POST"])
+def register():
+    msg = ''
+    # Check if "username", "password" and "email" POST requests exist (user submitted form)
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
+        # Create variables for easy access
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+        # Check if account exists using MySQL
+        cursor = mydb.cursor()
+        cursor.execute(
+            'SELECT * FROM accounts WHERE username = %s', (username,))
+        account = cursor.fetchone()
+        # If account exists show error and validation checks
+        if account:
+            msg = 'Account already exists!'
+        elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+            msg = 'Invalid email address!'
+        elif not re.match(r'[A-Za-z0-9]+', username):
+            msg = 'Username must contain only characters and numbers!'
+        elif not username or not password or not email:
+            msg = 'Please fill out the form!'
+        else:
+            # Account doesnt exists and the form data is valid, now insert new account into accounts table
+            cursor.execute(
+                'INSERT INTO accounts VALUES (NULL, %s, %s, %s)', (username, password, email,))
+            mydb.commit()
+            msg = 'You have successfully registered!'
+    elif request.method == 'POST':
+        # Form is empty... (no POST data)
+        msg = 'Please fill out the form!'
+    # Show registration form with message (if any)
+    return render_template('register.html', msg=msg)
+
+
+@main_bp.route('/logout')
+def logout():
+    session.pop('loggedin', None)
+    session.pop('id', None)
+    session.pop('username', None)
+    return redirect("/")
 
 
 # form

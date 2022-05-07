@@ -9,6 +9,11 @@ def create_app():
     # Retrieve configuration information
     app.config.from_object('app.config.Config')
 
+    app.config['MYSQL_HOST'] = 'localhost'
+    app.config['MYSQL_USER'] = 'root'
+    app.config['MYSQL_PASSWORD'] = 'mriganka123'
+    app.config['MYSQL_DB'] = 'flask'
+
     # Initialization of blueprints
     from app.main import main_bp
 

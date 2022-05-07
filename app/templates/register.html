@@ -1,0 +1,30 @@
+{% extends "template.html" %}
+
+
+{% block content %}
+<div class="container">
+    <div class="register">
+        <h1>Register</h1>
+        <div class="links">
+            <a href="/login">Login</a>
+            <a href="/register" class="active">Register</a>
+        </div>
+        <form action="/register" method="post" autocomplete="off">
+            <label for="username">
+                <i class="fas fa-user"></i>
+            </label>
+            <input type="text" name="username" placeholder="Username" id="username" required>
+            <label for="password">
+                <i class="fas fa-lock"></i>
+            </label>
+            <input type="password" name="password" placeholder="Password" id="password" required>
+            <label for="email">
+                <i class="fas fa-envelope"></i>
+            </label>
+            <input type="email" name="email" placeholder="Email" id="email" required>
+            <div class="msg" style="color: rgb(8, 218, 8);">{{ msg }}</div>
+            <input type="submit" value="Register">
+        </form>
+    </div>
+</div>
+{% endblock content %}

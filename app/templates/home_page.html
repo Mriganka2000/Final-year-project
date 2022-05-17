@@ -1,6 +1,20 @@
 {% extends "template.html" %}
 
 {% block content %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-dark alert-dismissible fade show" role="alert">
+    <strong>{{ message }}</strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
 <div class="jumbotron" style="background-image: linear-gradient(to right, #00a8ff, #4cd137);">
     <div class="row">
         <div class="col-12">

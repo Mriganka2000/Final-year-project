@@ -44,18 +44,15 @@ def gen(camera):
 
     while True:
         frame = camera.get_frame()
-        frame_processed = detect_mask_in_frame(frame)
+        frame_processed, mask_or_not = detect_mask_in_frame(frame)
+        # print(mask_or_not)
         frame_processed = cv2.imencode('.jpg', frame_processed)[1].tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_processed + b'\r\n')
+        yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame_processed + b'\r\n')
 
 
 @main_bp.route('/video_feed')
 def video_feed():
-    return Response(gen(
-        Camera()
-    ),
-        mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen(Camera()), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 def allowed_file(filename):
@@ -97,14 +94,15 @@ def login():
     # Output message if something goes wrong...
     msg = ''
     # Check if "username" and "password" POST requests exist (user submitted form)
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+    if request.method == 'POST' and 'username' in request.form and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access
         username = request.form['username']
+        code = request.form['code']
         password = request.form['password']
         # Check if account exists using MySQL
         cursor = mydb.cursor()
         cursor.execute(
-            'SELECT * FROM accounts WHERE username = %s AND password = %s', (username, password,))
+            'SELECT * FROM employee WHERE username = %s AND code = %s AND password = %s', (username, code, password,))
         # Fetch one record and return result
         account = cursor.fetchone()
         # print(account)
@@ -112,10 +110,17 @@ def login():
         if account:
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
-            session['id'] = account[1]
+            session['id'] = account[5]
             session['username'] = account[2]
             # Redirect to home page
-            return 'Logged in successfully!'
+            # return 'Logged in successfully!'
+            cursor.execute(
+                "INSERT INTO `attendence`(`code`, `date`, `isPresent`) VALUES(%s, current_timestamp(), 'P')",
+                (code,)
+            )
+            mydb.commit()
+            flash(account[1] + " logged in and attendence given successfully!")
+            return redirect(url_for('main.home_page'))
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'
@@ -127,15 +132,17 @@ def login():
 def register():
     msg = ''
     # Check if "username", "password" and "email" POST requests exist (user submitted form)
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
+    if request.method == 'POST' and 'name' in request.form and 'username' in request.form and 'code' in request.form and 'password' in request.form and 'email' in request.form:
         # Create variables for easy access
+        name = request.form['name']
         username = request.form['username']
+        code = request.form['code']
         password = request.form['password']
         email = request.form['email']
         # Check if account exists using MySQL
         cursor = mydb.cursor()
         cursor.execute(
-            'SELECT * FROM accounts WHERE username = %s', (username,))
+            'SELECT * FROM employee WHERE code = %s', (code,))
         account = cursor.fetchone()
         # If account exists show error and validation checks
         if account:
@@ -149,9 +156,9 @@ def register():
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
             cursor.execute(
-                'INSERT INTO accounts VALUES (NULL, %s, %s, %s)', (username, password, email,))
+                'INSERT INTO employee VALUES (NULL, %s, %s, %s, %s, %s)', (name, username, password, email, code,))
             mydb.commit()
-            msg = 'You have successfully registered!'
+            msg = name + ' successfully registered!'
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'

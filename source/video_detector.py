@@ -35,6 +35,7 @@ def video_mask_detector():
 
 def detect_mask_in_frame(frame):
     frame = imutils.resize(frame, width=500)
+    mask_or_not = ""
 
     # convert an image from one color space to another
     # (to grayscale)
@@ -61,14 +62,16 @@ def detect_mask_in_frame(frame):
         faces_dict["faces_rect"].append(rect)
 
     if faces_dict["faces_list"]:
-        faces_preprocessed = preprocess_input(np.array(faces_dict["faces_list"]))
+        faces_preprocessed = preprocess_input(
+            np.array(faces_dict["faces_list"]))
         preds = model.predict(faces_preprocessed)
 
         for i, pred in enumerate(preds):
             mask_or_not, confidence = decode_prediction(pred)
-            write_bb(mask_or_not, confidence, faces_dict["faces_rect"][i], frame)
+            write_bb(mask_or_not, confidence,
+                     faces_dict["faces_rect"][i], frame)
 
-    return frame
+    return frame, mask_or_not
 
 
 if __name__ == '__main__':

@@ -10,10 +10,18 @@
             <a href="/register" class="active">Register</a>
         </div>
         <form action="/register" method="post" autocomplete="off">
+            <label for="name">
+                <i class="fa fa-user-circle"></i>
+            </label>
+            <input type="text" name="name" placeholder="Name" id="name" required>
             <label for="username">
                 <i class="fas fa-user"></i>
             </label>
             <input type="text" name="username" placeholder="Username" id="username" required>
+            <label for="code">
+                <i class="fa fa-id-card"></i>
+            </label>
+            <input type="text" name="code" placeholder="Employee Code" id="code" required>
             <label for="password">
                 <i class="fas fa-lock"></i>
             </label>

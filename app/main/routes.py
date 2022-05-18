@@ -41,7 +41,6 @@ def home_page():
 
 
 def gen(camera):
-
     while True:
         frame = camera.get_frame()
         frame_processed, mask_or_not = detect_mask_in_frame(frame)

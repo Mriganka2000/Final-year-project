@@ -1,7 +1,7 @@
 # Final-year-project
 
 
-> To run this project make sure you have installed Python version 3.7.6 If not have [Download here] (https://www.python.org/downloads/release/python-376/)
+> To run this project make sure you have installed Python version 3.7.6 If not have <a href="https://www.python.org/downloads/release/python-376"/>Download Here</a>
 
 Run this commands one by one 
 
